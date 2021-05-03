@@ -1,0 +1,150 @@
+import numpy as np
+import pandas as pd
+import io
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.cluster import KMeans
+from sklearn.linear_model import LinearRegression
+
+from google.colab import files
+uploaded = files.upload()
+
+data = pd.read_csv(io . BytesIO(uploaded['books_review&rating.csv']))
+print(data)
+print(data.head(10))
+df=pd.DataFrame(data)
+
+data.shape
+data.info()
+
+**slicing**
+
+tb=data[0:200]
+print(tb)
+
+
+# Data cleaning
+
+print(data.isnull().sum())
+
+print("after data_cleaning")
+
+print(data.mean())
+data.fillna(data.mean(),inplace=True)
+print(data.isnull().sum())
+print(data)
+
+
+#'Name' Top 20 books that have highest sold**
+Top_sold = data['Name'].value_counts().iloc[:20]
+plt.figure(figsize=(7,14))
+
+sns.barplot(x = Top_sold.values , y = Top_sold.index , color='pink', alpha=.7)
+
+plt.title('Top 30 books that have highest sold', fontsize=16)
+
+plt.xlabel('Count' , fontsize=15)
+plt.ylabel('NAME OF THE BOOKS' , fontsize=15)
+
+plt.xticks(fontsize=10 )
+plt.yticks(fontsize=10)
+plt.show()
+
+
+
+#Distrubution
+plt.figure(figsize=(12,6))
+sns.distplot(data['Price'],color='purple')
+plt.title('Price Distribution Plot',fontsize=16)
+plt.show()
+
+#histogram
+bins = 100
+data.hist(bins=bins,figsize=(20,15))
+plt.show()
+
+# Bar Graph
+x=(tb['Year'])
+y=(tb['Reviews'])
+y1=(tb['Price'])
+plt.xlabel("Year")
+plt.ylabel(" Review & Price")
+plt.title("Yearwise Review of book")
+plt.bar(x,y,color='orange',align='center',edgecolor='green',label=('Reviews'))
+plt.bar(x,y1,color='blue',align='center',edgecolor='green',label=('Price'))
+plt.legend()
+plt.show()
+
+#Scatter plot
+plt.scatter(data['Author'],data['User Rating'],s=15,c="orange",alpha=1)
+plt.title('Scatter plot AUTHOR vs USER RATING')
+plt.xlabel('Author')
+plt.ylabel('User Rating')
+plt.show()
+
+#Planline
+x = np.linspace(0, 5, 100)
+plt.plot(x, x, label='Name')
+plt.plot(x, x**2, label='Reviews')
+plt.plot(x, x**3, label='User Rating')
+plt.xlabel('x label')
+plt.ylabel('y label')
+plt.title("Simple Plot")
+plt.legend()
+plt.show()
+
+#BOXPLOT
+#for individual attribute of dataframe
+plt.figure(figsize=(7,5))
+sns.boxplot(y=data['User Rating'])
+plt.title('User Rating')
+plt.show()
+
+#For each numeric attribute of dataframe
+data.plot.box()
+
+
+#jointplot
+sns.jointplot(y=data['Price'],x=data['Reviews'],hue=data['Genre'],alpha=0.6,palette='magma',height=6)
+plt.show()
+
+
+#heatmap
+plt.figure(figsize=(15,7))
+sns.heatmap(data.drop(['Name','Genre','Author','Year'],axis=1).corr(),cmap='viridis',annot=True)
+plt.show()
+
+#KMeans Algorithm
+print('4 centroid for Rating & year')
+
+df=pd.DataFrame(data[['Year','User Rating']])
+tb=df[0:200]
+
+kmeans = KMeans(n_clusters=4).fit(tb)
+centroids = kmeans.cluster_centers_
+print(centroids)
+
+plt.xlabel("Year")
+plt.ylabel("User Rating")
+plt.title("Yearwise Ratings of books")
+
+
+plt.scatter(tb['Year'], tb['User Rating'], c=kmeans.labels_.astype(float), s=60, alpha=0.5)
+plt.scatter(centroids[:, 0], centroids[:, 1], c='red', s=60)
+plt.show()
+
+
+#Linear Regression
+plt.xlabel("Year")
+plt.ylabel("User Rating")
+plt.title("Yearwise Rating of books")
+x = tb.iloc[:, 0].values.reshape(-1, 1)  # values converts it into a numpy array
+y = tb.iloc[:, 1].values.reshape(-1, 1)  # -1 means that calculate the dimension of rows, but have 1 column
+linear_regressor = LinearRegression()  # create object for the class
+linear_regressor.fit(x, y)  # perform linear regression
+y_pred = linear_regressor.predict(x)
+plt.scatter(x, y)
+plt.plot(x, y_pred, color='red',label=('Linear Regression'))
+plt.legend()
+
+plt.show()
